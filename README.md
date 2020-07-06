@@ -8,3 +8,5 @@ The meaning of each column:
 |      column 1  | column 2 | column 3 | column 4 |column 5 | column 6 |
 |:-------|:------|:-------|:-------|:-------|:-------|
 |  input slew | output load |delay(mean)|delay(stddev)|output_slew(mean)|output_slew(stddev)|
+
+> Time unit:s  Capacitance unit:F
