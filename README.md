@@ -21,7 +21,7 @@ The load_lutxt module is used to load given .lutxt(s) and finish their interpola
 ```python3
 import load_lutxt as load
 
-Lut = load.LUT("path/to/lutxts") # or Lut = load.LUT("path/to/lutxts/folder")
+Lut = load.LUT("path/to/lutxts")
 delay_miu_lut,delay_sigma_lut,slew_miu_lut,slew_sigma_lut = Lut.getAll(slew,cap,0) # 0 corresponding to the 0th *.lutxt file in last step
 
 ```
