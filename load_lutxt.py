@@ -7,11 +7,14 @@
 import numpy as np 
 import os 
 
-
 class LUT:
-	# dependencies:
-	# lut.txt(s)
-	def __init__(self,file_path):
+	
+	"""
+	dependencies:
+	lut.txt(s)
+	"""
+
+	def __init__(self,file_path="."):
 		self._lutpath = []
 		self._slew_lower = 0.0
 		self._slew_upper = 0.0
@@ -23,13 +26,32 @@ class LUT:
 		self._lut_size = []
 
 		self.readlutxt(file_path)
+
+	def getAllLutxt(self,file_path):
+		ListOfFile = os.listdir(file_path)
+		for entry in ListOfFile:
+			if entry.endswith(".lutxt"):
+				abspath = os.path.join(file_path,entry)
+				if os.path.isdir(abspath):
+					self._lutpath.extend(getAllLutxt(abspath))
+				else:
+					self._lutpath.append(abspath)
+		
+		if not (self._lutpath):
+			raise Exception("No .lutxt under this path,Please check")
+		else:
+			self._buffer_num = len(self._lutpath)
 	
 	def readlutxt(self,file_path):
-		# read prepared lookup table , slew & cap index
-		self._lutpath.append(file_path)
+		
+		"""
+		read prepared lookup table , slew & cap index
+		"""
+		
+		self.getAllLutxt(file_path)
 
 		# for read lut_size
-		with open(self._lutpath[0],'r') as f: self._lut_size = [int(s) for s in f.readline().strip().split(" ")]
+		with open(lut,'r') as f: self._lut_size = [int(s) for s in f.readline().strip().split(" ")]
 
 		self._delay_miu_lut   = np.zeros((self._lut_size[0],self._lut_size[1],self._buffer_num))
 		self._delay_sigma_lut = np.zeros((self._lut_size[0],self._lut_size[1],self._buffer_num))
@@ -46,17 +68,18 @@ class LUT:
 						data = f.readline().strip().split(" ")
 
 						if i == 0:
-							self._lut_load_index.append(float(data[0]))
+							self._lut_load_index.append(float(data[1]))
 						if j == 0:
-							self._lut_slew_index.append(float(data[1]))
+							self._lut_slew_index.append(float(data[0]))
 						
 						self._delay_miu_lut[i,j,s] = float(data[2]) # mean value of delay
 						self._delay_sigma_lut[i,j,s] = float(data[3]) # standard deviation of delay
 						self._slew_miu_lut[i,j,s]  = float(data[4]) # mean value of output slew
 						self._slew_sigma_lut[i,j,s] = float(data[5]) # standard deviation of output slew
 		
-		self._slew_lower, self._slew_upper = self._lut_slew_index.min(), self._lut_slew_index.max()
-		self._load_lower, self._load_upper = self._lut_load_index.min(), self._lut_load_index.max()
+		self._slew_lower, self._slew_upper = min(self._lut_slew_index), max(self._lut_slew_index)
+		self._load_lower, self._load_upper = min(self._lut_load_index), max(self._lut_load_index)
+
 
 	def getInputIndex(self,input_slew,output_cap):
 
@@ -77,7 +100,10 @@ class LUT:
 		return slew_index, cap_index
 	
 	def getDelayM(self,input_slew,output_cap,s):
-		# get delay from interpolated lookup table
+		
+		"""
+		get delay from interpolated lookup table
+		"""
 
 		slew_index,cap_index = self.getInputIndex(input_slew,output_cap)
 
@@ -90,8 +116,11 @@ class LUT:
 		return p1*(1-r_c) + p2*r_c
 
 	def getDelayS(self,input_slew,output_cap,s):
-		# get delay sigma from interpolated lookup table
-
+		
+		"""
+		get delay sigma from interpolated lookup table
+		"""
+		
 		slew_index,cap_index = self.getInputIndex(input_slew,output_cap)
 
 		r_s = (input_slew-self._lut_slew_index[slew_index])/(self._lut_slew_index[slew_index+1]-self._lut_slew_index[slew_index])
@@ -103,8 +132,11 @@ class LUT:
 		return p1*(1-r_c) + p2*r_c
 
 	def getSlewM(self,input_slew,output_cap,s):
-		# get slew from interpolated lookup table
-
+		
+		"""
+		get slew from interpolated lookup table
+		"""
+		
 		slew_index,cap_index = self.getInputIndex(input_slew,output_cap)
 
 		r_s = (input_slew-self._lut_slew_index[slew_index])/(self._lut_slew_index[slew_index+1]-self._lut_slew_index[slew_index])
@@ -116,8 +148,11 @@ class LUT:
 		return p1*(1-r_c) + p2*r_c
 
 	def getSlewS(self,input_slew,output_cap,s):
-		# get slew sigma from interpolated lookup table
-
+		
+		"""
+		get slew sigma from interpolated lookup table
+		"""
+		
 		slew_index,cap_index = self.getInputIndex(input_slew,output_cap)
 
 		r_s = (input_slew-self._lut_slew_index[slew_index])/(self._lut_slew_index[slew_index+1]-self._lut_slew_index[slew_index])
@@ -128,7 +163,7 @@ class LUT:
 
 		return p1*(1-r_c) + p2*r_c
 	
-	def getAll(self,input_slew,output_cap,size):
+	def getAll(self,input_slew,output_cap,size=0):
 		delay 		= self.getDelayM(input_slew,output_cap,size)
 		delay_sigma = self.getDelayS(input_slew,output_cap,size)
 		slew		= self.getSlewM (input_slew,output_cap,size)
