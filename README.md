@@ -10,3 +10,13 @@ The meaning of each column:
 |  input slew | output load |delay(mean)|delay(stddev)|output_slew(mean)|output_slew(stddev)|
 
 > Time unit:s  Capacitance unit:F
+
+# How to load_lutxt
+
+```python3
+import load_lutxt as load
+
+Lut = load.LUT("path/to/lutxts") # or Lut = load.LUT("path/to/lutxts/folder")
+delay_miu_lut,delay_sigma_lut,slew_miu_lut,slew_sigma_lut = Lut.getAll(slew,cap,0) # 0 corresponding to the 0th *.lutxt file in last step
+
+```
