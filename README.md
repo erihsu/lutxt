@@ -11,6 +11,11 @@ The meaning of each column:
 
 > Time unit:s  Capacitance unit:F
 
+# load_lutxt module
+The load_lutxt module is used to load given .lutxt(s) and finish their interpolation by linear interpolation. You can look up their delay and output slew and their variation by give input slew, output capacitance and buffer type. The 7x7 lutxt's relative delay error is under 5% with our evaluation by hspice.
+
+![relative delay error of 7x7 lutxt](error.png)
+
 # How to load_lutxt
 
 ```python3
